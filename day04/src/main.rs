@@ -6,11 +6,34 @@ fn main() {
     println!("Part two: {result}");
 }
 
-fn read_input(input: &str) -> Vec<Vec<char>> {
+fn parse_input(input: &str) -> Vec<Vec<usize>> {
     let width = input.find('\n').unwrap();
-    let m = [".".repeat(width), input.to_string(), ".".repeat(width)].join("\n");
-    m.lines()
+    let padded: Vec<Vec<char>> = [".".repeat(width), input.to_string(), ".".repeat(width)]
+        .join("\n")
+        .lines()
         .map(|line| format!(".{line}.").chars().collect())
+        .collect();
+    padded
+        .iter()
+        .enumerate()
+        .map(|row| {
+            row.1
+                .iter()
+                .enumerate()
+                .map(|col| {
+                    let x = col.0;
+                    let y = row.0;
+                    if padded[y][x] == '.' {
+                        0
+                    } else {
+                        neighbors(x, y)
+                            .iter()
+                            .filter(|p| padded[p.1][p.0] == '@')
+                            .count()
+                    }
+                })
+                .collect()
+        })
         .collect()
 }
 
@@ -29,28 +52,28 @@ fn neighbors(x: usize, y: usize) -> [(usize, usize); 9] {
 }
 
 fn solve_part_one(input: &str) -> usize {
-    let lines = read_input(input);
-    let width = lines[0].len();
-    let height = lines.len();
+    let layout = parse_input(input);
 
     let mut result = 0;
 
-    for y in 1..height - 1 {
-        for x in 1..width - 1 {
-            if lines[y][x] == '.' {
-                continue;
-            }
+    let result = layout
+        .iter()
+        .map(|row| row.iter().filter(|&count| (1..5).contains(count)).count())
+        .sum();
 
-            let adjacent_rolls = neighbors(x, y)
-                .iter()
-                .filter(|p| lines[p.1][p.0] == '@')
-                .count();
-            if adjacent_rolls < 5 {
-                result += 1;
-            }
-        }
-    }
     result
+}
+
+fn remove_rolls(layout: &mut Vec<Vec<usize>>) -> (Vec<Vec<usize>>, usize) {
+    return (layout.clone(), 0);
+}
+
+fn solve_part_two(input: &str) -> usize {
+    let lines = parse_input(input);
+    let width = lines[0].len();
+    let height = lines.len();
+
+    43
 }
 
 #[cfg(test)]
